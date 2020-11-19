@@ -1,0 +1,138 @@
+#!/bin/bash
+
+# Script to fill the gap of what p4 missing
+# By Wasin Thonkaew
+# Contact: See github.com/haxpor
+#
+
+##  global envrionment variables
+# binary name or command linked to p4
+# NOTE: Change this to what you will use. If you use WSL 1/2, then highly recommended to use p4.exe
+# which is Windows based binary as p4 for linux has problem with WSL. Otherwise, rocks on with p4.
+declare -r P4BIN="p4.exe"
+
+# interrupt handler with SIGINT
+# FIXME: This is not so nice as we need to keep holding ctrl+c to send interrupt due to we are at
+# tight loop especially in "describe" command.
+program_SIGINT_handler() {
+	echo "Operation aborted"
+	exit 1
+}
+# register SIGINT interrupt handler
+trap program_SIGINT_handler SIGINT;
+
+# top-level help function
+print_help()
+{
+	__text="Usage: p4u <COMMAND> [OPTIONS]
+
+Available COMMAND is as follows
+	- p4u describe
+	- p4u help"
+	echo "${__text}"
+}
+
+main_cmd=''
+
+### Determine which main COMMAND to use
+## print help
+if [ "$1" == "help" ] || [ "$1" == "--help" ]; then
+	print_help
+	exit 0
+
+## COMMAND: describe
+elif [ "$1" == "describe" ]; then
+	main_cmd='describe'
+fi
+
+# shift left once to remove main COMMAND as we already processed
+shift 1
+
+### Execute main COMMAND
+### each COMMAND has different OPTIONS flags
+if [ "$main_cmd" == "describe" ]; then
+	# target shelved changelist to work with the command
+	describe_shelved_CL=''
+
+	# default will include header text describing shelved changelist
+	# if set to 0, then it will exclude such information
+	describe_isIncludeHeader=1
+
+	# default is diff mode (1)
+	# This works better than p4 that p4u will output content of those files as well (treat it as diff).
+	# If set to 0, then it will show full content of all shelved files
+	describe_diffMode=1
+
+	for ARGUMENT in "$@"
+	do
+		# FIXME: using a space is cleaner in usage at the command line
+		KEY=$(echo $ARGUMENT | cut -f1 -d= )
+		VALUE=$(echo $ARGUMENT | cut -f2 -d= )
+
+		case "${KEY}" in
+			"-S" )					describe_shelved_CL="${VALUE}" ;;
+			"--no-header" )			describe_isIncludeHeader=0 ;;
+			"--no-diff-mode" )		describe_diffMode=0	;;
+			"--help" )
+				# print help
+				_describe_helpText="Usage: p4u describe -S <CL> [OPTION] ...
+
+Description of supported flags
+	-S <CL>             <CL> is shelved changelist number e.g. 123456. This is mandatory.
+	--no-header         Output doesn't include changelist description, and list of shelved files.
+	--no-diff-mode      Use printing mode which output all content of all shelved files.
+	--help              Show this message."
+				echo "${_describe_helpText}"
+				exit 0
+				;;
+			* )
+				echo "Unknown option '${KEY}'"
+				# TODO: Add specific help message for this command here...
+				exit 1
+				;;
+		esac	
+	done
+
+	if [ -z "${describe_shelved_CL}" ]; then
+		echo "Shelved CL is empty"
+		echo "Specify it with -s <CL>"
+		exit 1
+	fi
+
+	#echo "shelved CL = ${describe_shelved_CL}"
+	#echo "includeHeader = ${describe_isIncludeHeader}"
+	#echo "diffMode = ${describe_diffMode}"
+	#echo "----"
+
+	# execute p4 command
+	if [ ${describe_diffMode} == 1 ]; then
+		_cachedOutputTxt=`$P4BIN describe -du -S $describe_shelved_CL`
+
+		if [ ${describe_isIncludeHeader} == 1 ]; then
+			echo "${_cachedOutputTxt}"
+		else
+			# remove lines starting from 1st line til "Differences ..." included a next empty line
+			# this is suitable for showing as diff file right away without manual removal of first un-related lines
+			# PS: (sed is so powerful :])
+			_cleanedUpFirstPartTxt=`echo "${_cachedOutputTxt}" | sed '0,/^Differences \.\.\./d' | sed '1,1d'`
+			echo "${_cleanedUpFirstPartTxt}"
+		fi
+
+		# p4 output empty space(s) at the end as well, how sad :/
+		# notice execute mulitple regex sed at once in one command connected with ;
+		# FIXME: exclude from file instead for more flexibility as there will be long list of it for artifact files
+		_newShelvedFiles=`cat <(echo "${_cachedOutputTxt}") | grep -v -e '\.dll' -e '\.exe' -e '\.pdb' -e '\.so' -e '\.lib' -e '\.a' | grep "^\.\.\. " | grep " add[[:space:]]*$" | sed 's/^\.\.\. //;s/#.*//'`
+
+		# process newly added shelved files
+		while IFS= read -r -u "$fd_num" addedFile
+		do
+			# TODO: Check back later for file header format making it more convenient and correct
+			# when apply with `patch` program
+			echo "==== ${addedFile}#1 (text) ===="
+			fileContent=`$P4BIN print -q "${addedFile}"@="${describe_shelved_CL}" | sed 's/^/\+/'`
+			fileTotalNumLines=`echo "${fileContent}" | wc -l`
+			echo "@@ -0,0 +1,${fileTotalNumLines} @@"
+			echo "${fileContent}"
+		done {fd_num}< <(echo "${_newShelvedFiles}")
+	fi
+fi
