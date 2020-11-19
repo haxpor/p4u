@@ -1,11 +1,11 @@
 # p4u
-p4 utility to fill up the gap of p4 itself.
+p4 utility (p4u) to fill up the gap of p4 itself.
 
 It is based on bash script thus working with bunch of shell commands.
 It works on top of `p4` binary as released officially but filled the gap for features and things that
 could be better.
 
-> For someone coming from `git` to use `p4`, I bet you know what was missing in the latter.
+> For someone coming from `git` to use perforce via its cli 'p4', I bet you know what was missing in the latter.
 
 # Features
 
