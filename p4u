@@ -78,7 +78,7 @@ if [ "$main_cmd" == "describe" ]; then
 				_describe_helpText="Usage: p4u describe -S <CL> [OPTION] ...
 
 Description of supported flags
-	-S <CL>             <CL> is shelved changelist number e.g. 123456. This is mandatory.
+	-S=<CL>             <CL> is shelved changelist number e.g. 123456. This is mandatory.
 	--no-header         Output doesn't include changelist description, and list of shelved files.
 	--no-diff-mode      Use printing mode which output all content of all shelved files.
 	--help              Show this message."
