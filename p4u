@@ -101,7 +101,7 @@ Description of supported flags
 
 	if [ -z "${describe_shelved_CL}" ]; then
 		echo "Shelved CL is empty"
-		echo "Specify it with -s <CL>"
+		echo "Specify it with -S <CL>"
 		exit 1
 	fi
 
