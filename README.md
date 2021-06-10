@@ -7,6 +7,21 @@ things that could be better.
 > For someone coming from `git` to use perforce via its cli 'p4', I bet you know
 > what was missing in the latter.
 
+# Installation
+
+You can just clone this repository, then symblink `p4u` file into your executable
+path e.g. `/usr/local/bin/`, or you can copy the file there.
+
+To make a symlink from `p4u` to `/usr/local/bin/p4u`, you can execute the following
+command
+
+```
+ln -s `pwd`/p4u /usr/local/bin/p4u
+```
+
+assume that you are currently at the project directory, and you have permission
+to create a file at target directory. Otherwise, you might need `sudo`.
+
 # Configuration
 
 Configuration is configured through environment variables for now, until there
