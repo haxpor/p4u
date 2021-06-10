@@ -1,28 +1,48 @@
-# p4u
-p4 utility (p4u) to fill up the gap of p4 itself.
+# p4u p4 utility (p4u) to fill up the gap of p4 itself.
 
-It is based on bash script thus working with bunch of shell commands.
-It works on top of `p4` binary as released officially but filled the gap for features and things that
-could be better.
+It is based on bash script thus working with bunch of shell commands.  It works
+on top of `p4` binary as released officially but filled the gap for features and
+things that could be better.
 
-> For someone coming from `git` to use perforce via its cli 'p4', I bet you know what was missing in the latter.
+> For someone coming from `git` to use perforce via its cli 'p4', I bet you know
+> what was missing in the latter.
+
+# Configuration
+
+Configuration is configured through environment variables for now, until there
+would be much more settings to be made, we might change the way to do this.
+
+Set the following environment variables through your aliased or profile file
+e.g. `~/.bash_aliases` or `~/.bash_profile`; for example `export
+<CFG-NAME>=<CFG-VALUE>`
+
+* `P4U_BIN` - to change which `p4` binary to use inside the script
+
+  It is a high chance that you would be working on WSL 1/2 with perforce. The
+  project should be able to built on Windows platform, and able to interact with
+  command line on WSL. `p4` binary for WSL won't work as it cannot adapt to use
+  the correct path for each platform correctly. So using `p4.exe` which is a
+  binary for Windows version, but we execute it on WSL is the solution as it
+  understands Windows path correctly. Thus it becomes this setting. Most likely,
+  just set `P4U_BIN=p4.exe` should be fine for WSL environment.
 
 # Features
-
-*WIP*, some implemented as below.
 
 ## `p4u describe`
 
 Original `p4 describe` has limitation as follows
 
-* It doesn't show (additional) diff of newly added files on the shelved changelist.
-* It outputs in non-unified (non-git compatible) format, it needs a particular flags to make it output just that
-* It outputs excessed header text although it's good, but sometimes we want to directly pipe it to ` ... | view -` (`vim`) to see as diff format immediatley without manual removal of such header lines.
+* It doesn't show (additional) diff of newly added files on the shelved
+  changelist.
+* It outputs in non-unified (non-git compatible) format, it needs a particular
+  flags to make it output just that
+* It outputs excessed header text although it's good, but sometimes we want to
+  directly pipe it to ` ... | view -` (`vim`) to see as diff format immediatley
+without manual removal of such header lines.
 
 Usages as implemented
 
 * `p4u describe -S=123456`
 * `p4u describe -S=123456 --no-header`
 
-# License
-MIT, Wasin Thonkaew
+# License MIT, Wasin Thonkaew

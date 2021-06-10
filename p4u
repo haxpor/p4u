@@ -5,11 +5,17 @@
 # Contact: See github.com/haxpor
 #
 
-##  global envrionment variables
-# binary name or command linked to p4
-# NOTE: Change this to what you will use. If you use WSL 1/2, then highly recommended to use p4.exe
-# which is Windows based binary as p4 for linux has problem with WSL. Otherwise, rocks on with p4.
-declare -r P4BIN="p4.exe"
+# List of environment variables set to default before sourcing in from checking
+# from environment variables user has set.
+envcfg_bin=p4
+
+# Check and set configurations from user's environment variables
+function check_env_cfg
+{
+	if [[ ! -z "$P4U_BIN" ]]; then
+		envcfg_bin="$P4U_BIN"
+	fi
+}
 
 # interrupt handler with SIGINT
 # FIXME: This is not so nice as we need to keep holding ctrl+c to send interrupt due to we are at
@@ -106,7 +112,7 @@ Description of supported flags
 
 	# execute p4 command
 	if [ ${describe_diffMode} == 1 ]; then
-		_cachedOutputTxt=`$P4BIN describe -du -S $describe_shelved_CL`
+		_cachedOutputTxt=`"$envcfg_bin"	describe -du -S $describe_shelved_CL`
 
 		if [ ${describe_isIncludeHeader} == 1 ]; then
 			echo "${_cachedOutputTxt}"
@@ -129,7 +135,7 @@ Description of supported flags
 			# TODO: Check back later for file header format making it more convenient and correct
 			# when apply with `patch` program
 			echo "==== ${addedFile}#1 (text) ===="
-			fileContent=`$P4BIN print -q "${addedFile}"@="${describe_shelved_CL}" | sed 's/^/\+/'`
+			fileContent=`"$envcfg_bin" print -q "${addedFile}"@="${describe_shelved_CL}" | sed 's/^/\+/'`
 			fileTotalNumLines=`echo "${fileContent}" | wc -l`
 			echo "@@ -0,0 +1,${fileTotalNumLines} @@"
 			echo "${fileContent}"
