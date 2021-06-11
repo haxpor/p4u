@@ -105,11 +105,6 @@ Description of supported flags
 		exit 1
 	fi
 
-	#echo "shelved CL = ${describe_shelved_CL}"
-	#echo "includeHeader = ${describe_isIncludeHeader}"
-	#echo "diffMode = ${describe_diffMode}"
-	#echo "----"
-
 	# execute p4 command
 	if [ ${describe_diffMode} == 1 ]; then
 		_cachedOutputTxt=`"$envcfg_bin"	describe -du -S $describe_shelved_CL`
