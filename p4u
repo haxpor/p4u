@@ -127,6 +127,11 @@ Description of supported flags
 		# process newly added shelved files
 		while IFS= read -r -u "$fd_num" addedFile
 		do
+			# check if empty then ignore it
+			if [ -z "${addedFile}" ]; then
+				continue
+			fi
+
 			# TODO: Check back later for file header format making it more convenient and correct
 			# when apply with `patch` program
 			echo "==== ${addedFile}#1 (text) ===="
