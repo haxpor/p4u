@@ -147,7 +147,7 @@ Description of supported flags
 			echo "${_cachedOutputTxt}"
 		fi
 
-		changedFiles=`cat <(echo "${_cachedOutputTxt}") | grep -v -e '\.dll' -e '\.exe' -e '\.pdb' -e '\.so' -e '\.lib' -e '\.a' | grep "^\.\.\. " | egrep " (add|edit)[[:space:]]*$" | sed 's/^\.\.\. //;s/ add\s*//;s/ edit\s*//'`
+		changedFiles=`cat <(echo "${_cachedOutputTxt}") | grep -v -e '\.dll' -e '\.exe' -e '\.pdb' -e '\.so' -e '\.lib' -e '\.a' | grep "^\.\.\. " | egrep " (add|edit|branch|integrate)[[:space:]]*$" | sed 's/^\.\.\. //;s/ add\s*//;s/ edit\s*//;s/ branch\s*//;s/ integrate\s*//'`
 		
 		# print entire content of each changed file
 		while IFS= read -r -u "$fd_num" chgFile
