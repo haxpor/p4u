@@ -69,6 +69,11 @@ if [ "$main_cmd" == "describe" ]; then
 	# If set to 0, then it will show full content of all shelved files
 	describe_diffMode=1
 
+	# defaults is not specify this value, and let p4 handles it
+	# Number of context lines around the line that changed
+	# Note: value -1 means not use
+	describe_numContextLines=-1
+
 	for ARGUMENT in "$@"
 	do
 		# FIXME: using a space is cleaner in usage at the command line
@@ -79,6 +84,7 @@ if [ "$main_cmd" == "describe" ]; then
 			"-S" )                  describe_shelved_CL="${VALUE}" ;;
 			"--no-header" )         describe_isIncludeHeader=0 ;;
 			"--no-diff" )           describe_diffMode=0	;;
+			"-dc" )                 describe_numContextLines="${VALUE}" ;;
 			"--help" )
 				# print help
 				_describe_helpText="Usage: p4u describe -S <CL> [OPTION] ...
@@ -87,6 +93,7 @@ Description of supported flags
 	-S=<CL>             <CL> is shelved changelist number e.g. 123456. This is mandatory.
 	--no-header         Output doesn't include changelist description, and list of shelved files.
 	--no-diff           Use printing mode which output all content of all shelved files.
+	-dc=<NUM>           Set number of context lines around the line that changed.
 	--help              Show this message."
 				echo "${_describe_helpText}"
 				exit 0
@@ -107,7 +114,11 @@ Description of supported flags
 
 	# execute p4 command
 	if [ ${describe_diffMode} == 1 ]; then
-		_cachedOutputTxt=`"$envcfg_bin"	describe -du -S $describe_shelved_CL`
+		if [ "${describe_numContextLines}" -gt 0 ]; then
+			_cachedOutputTxt=`"$envcfg_bin"	describe -du -dc"${describe_numContextLines}" -S $describe_shelved_CL`
+		else
+			_cachedOutputTxt=`"$envcfg_bin"	describe -du -S $describe_shelved_CL`
+		fi
 
 		if [ ${describe_isIncludeHeader} == 1 ]; then
 			echo "${_cachedOutputTxt}"
